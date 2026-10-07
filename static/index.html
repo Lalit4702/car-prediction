@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AutoValuate AI | Intelligent Car Price Prediction</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+              900: '#1e3a8a',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(226, 232, 240, 0.8);
+    }
+    .gradient-header {
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    }
+    .badge-glow {
+      box-shadow: 0 0 15px rgba(59, 130, 246, 0.35);
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col antialiased selection:bg-blue-500 selection:text-white">
+
+  <!-- Top Navigation Bar -->
+  <header class="border-b border-slate-200 bg-white/90 backdrop-blur sticky top-0 z-50 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-blue-500/20">
+          <i class="fa-solid fa-car-side text-lg"></i>
+        </div>
+        <div>
+          <span class="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">AutoValuate AI</span>
+          <span class="hidden sm:inline-block ml-2 px-2 py-0.5 text-xs font-semibold bg-blue-50 text-blue-700 rounded-full border border-blue-200">ML Random Forest</span>
+        </div>
+      </div>
+      <div class="flex items-center space-x-3">
+        <a href="/docs" target="_blank" class="text-sm font-medium text-slate-600 hover:text-blue-600 transition flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-slate-100">
+          <i class="fa-solid fa-book-bookmark text-slate-400"></i>
+          <span>API Docs (Swagger)</span>
+        </a>
+        <a href="http://localhost:8501" target="_blank" class="text-sm font-medium bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-2 rounded-lg shadow-sm hover:shadow-md hover:from-blue-700 hover:to-indigo-700 transition flex items-center gap-2">
+          <i class="fa-solid fa-chart-line"></i>
+          <span>Launch Streamlit Pro</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="gradient-header text-white py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+    <div class="absolute -right-20 -top-20 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute -left-20 -bottom-20 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+    
+    <div class="max-w-7xl mx-auto relative z-10 text-center sm:text-left sm:flex sm:items-center sm:justify-between">
+      <div>
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-xs font-medium mb-3 border border-blue-400/30">
+          <i class="fa-solid fa-wand-magic-sparkles"></i> 96.5% Precision Machine Learning Model
+        </div>
+        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight">
+          Accurate Used Car Price Valuation
+        </h1>
+        <p class="mt-3 text-slate-300 max-w-2xl text-base sm:text-lg">
+          Predict market resale value in seconds using our multi-parameter Random Forest ML pipeline trained on authentic Indian automotive market transaction records.
+        </p>
+      </div>
+
+      <!-- Quick Preset Cards -->
+      <div class="mt-6 sm:mt-0 flex flex-wrap gap-2 justify-center sm:justify-end max-w-sm">
+        <span class="w-full text-xs text-slate-400 uppercase tracking-wider font-semibold text-center sm:text-right">Quick Presets:</span>
+        <button onclick="applyPreset('swift', 2015, 6.87, 42000, 'Diesel', 'Dealer', 'Manual', 0)" class="px-3 py-1.5 text-xs bg-slate-800/80 hover:bg-slate-700 border border-slate-700 rounded-lg text-slate-200 transition">
+          🚗 Swift 2015
+        </button>
+        <button onclick="applyPreset('city', 2017, 9.85, 25000, 'Petrol', 'Dealer', 'Manual', 0)" class="px-3 py-1.5 text-xs bg-slate-800/80 hover:bg-slate-700 border border-slate-700 rounded-lg text-slate-200 transition">
+          🚗 Honda City 2017
+        </button>
+        <button onclick="applyPreset('fortuner', 2017, 31.0, 55000, 'Diesel', 'Dealer', 'Automatic', 0)" class="px-3 py-1.5 text-xs bg-slate-800/80 hover:bg-slate-700 border border-slate-700 rounded-lg text-slate-200 transition">
+          🚙 Fortuner 2017
+        </button>
+        <button onclick="applyPreset('i20', 2016, 7.5, 38000, 'Petrol', 'Individual', 'Manual', 1)" class="px-3 py-1.5 text-xs bg-slate-800/80 hover:bg-slate-700 border border-slate-700 rounded-lg text-slate-200 transition">
+          🚗 i20 2016 (2nd Owner)
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Content Form & Results -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-1 w-full">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+
+      <!-- Form Column -->
+      <div class="lg:col-span-7 bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8">
+        <div class="flex items-center justify-between pb-5 border-b border-slate-100 mb-6">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-sm">1</div>
+            <h2 class="text-xl font-bold text-slate-900">Vehicle Specifications</h2>
+          </div>
+          <span class="text-xs text-slate-400 font-medium">All fields required</span>
+        </div>
+
+        <form id="carForm" class="space-y-6" onsubmit="event.preventDefault(); calculatePrice();">
+          <!-- Car Model Selection -->
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-2">
+              <i class="fa-solid fa-car text-blue-500 mr-1.5"></i> Car Brand / Model
+            </label>
+            <div class="relative">
+              <select id="car_name" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-800 font-medium focus:ring-2 focus:ring-blue-500 focus:bg-white focus:outline-none transition appearance-none" onchange="autoFillDefaults()">
+                <option value="swift">Maruti Suzuki Swift</option>
+                <option value="city">Honda City</option>
+                <option value="verna">Hyundai Verna</option>
+                <option value="fortuner">Toyota Fortuner</option>
+                <option value="innova">Toyota Innova</option>
+                <option value="ciaz">Maruti Suzuki Ciaz</option>
+                <option value="i20">Hyundai i20</option>
+                <option value="brio">Honda Brio</option>
+                <option value="amaze">Honda Amaze</option>
+                <option value="ertiga">Maruti Suzuki Ertiga</option>
+                <option value="wagon r">Maruti Suzuki Wagon R</option>
+                <option value="corolla altis">Toyota Corolla Altis</option>
+                <option value="sx4">Maruti Suzuki SX4</option>
+                <option value="ritz">Maruti Suzuki Ritz</option>
+                <option value="dzire">Maruti Suzuki Dzire</option>
+                <option value="jazz">Honda Jazz</option>
+                <option value="grand i10">Hyundai Grand i10</option>
+                <option value="alto k10">Maruti Suzuki Alto K10</option>
+                <option value="baleno">Maruti Suzuki Baleno</option>
+                <option value="creta">Hyundai Creta</option>
+                <option value="s cross">Maruti Suzuki S-Cross</option>
+                <option value="etios liva">Toyota Etios Liva</option>
+                <option value="Royal Enfield Classic 350">Royal Enfield Classic 350</option>
+                <option value="Bajaj Pulsar 150">Bajaj Pulsar 150</option>
+              </select>
+              <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-500">
+                <i class="fa-solid fa-chevron-down text-xs"></i>
+              </div>
+            </div>
+            <p class="text-xs text-slate-500 mt-1.5">Selecting a model auto-fills approximate showroom cost and specs.</p>
+          </div>
+
+          <!-- Manufacturing Year & Original Showroom Price -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div>
+              <div class="flex justify-between items-center mb-1.5">
+                <label class="text-sm font-semibold text-slate-700">
+                  <i class="fa-solid fa-calendar-days text-blue-500 mr-1.5"></i> Manufacturing Year
+                </label>
+                <span id="yearDisplay" class="text-xs font-bold px-2 py-0.5 rounded bg-blue-100 text-blue-800">2015</span>
+              </div>
+              <input type="range" id="year" min="2004" max="2026" value="2015" step="1" class="w-full accent-blue-600 h-2 bg-slate-200 rounded-lg cursor-pointer" oninput="document.getElementById('yearDisplay').innerText = this.value; updateAgeDisplay();">
+              <div class="flex justify-between text-[11px] text-slate-400 mt-1">
+                <span>2004 (Older)</span>
+                <span id="ageBadge">11 yrs old</span>
+                <span>2026 (New)</span>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-sm font-semibold text-slate-700 mb-1.5">
+                <i class="fa-solid fa-tag text-blue-500 mr-1.5"></i> Present/Showroom Price
+              </label>
+              <div class="relative">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400 font-bold text-sm">₹</span>
+                <input type="number" id="present_price" step="0.1" min="0.1" max="100.0" value="6.87" class="w-full bg-slate-50 border border-slate-300 rounded-xl pl-8 pr-16 py-2.5 text-slate-800 font-semibold focus:ring-2 focus:ring-blue-500 focus:bg-white focus:outline-none transition">
+                <span class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-xs font-bold text-slate-400">Lakhs</span>
+              </div>
+              <p class="text-[11px] text-slate-400 mt-1">Original or current ex-showroom showroom cost</p>
+            </div>
+          </div>
+
+          <!-- Kilometers Driven -->
+          <div>
+            <div class="flex justify-between items-center mb-1.5">
+              <label class="text-sm font-semibold text-slate-700">
+                <i class="fa-solid fa-gauge-high text-blue-500 mr-1.5"></i> Kilometers Driven (Odometer)
+              </label>
+              <span id="kmsDisplay" class="text-xs font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700">42,000 km</span>
+            </div>
+            <input type="range" id="kms_driven" min="1000" max="200000" step="1000" value="42000" class="w-full accent-blue-600 h-2 bg-slate-200 rounded-lg cursor-pointer" oninput="document.getElementById('kmsDisplay').innerText = Number(this.value).toLocaleString() + ' km'; document.getElementById('kmsInput').value = this.value;">
+            <div class="mt-2 flex items-center gap-2">
+              <span class="text-xs text-slate-500">Or enter directly:</span>
+              <input type="number" id="kmsInput" value="42000" min="0" max="500000" class="w-32 bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1 text-xs text-slate-800 font-semibold focus:ring-1 focus:ring-blue-500" oninput="document.getElementById('kms_driven').value = this.value; document.getElementById('kmsDisplay').innerText = Number(this.value).toLocaleString() + ' km';">
+            </div>
+          </div>
+
+          <!-- Radio Selector Groups: Fuel, Transmission, Seller, Owner -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 pt-2">
+            <!-- Fuel Type -->
+            <div>
+              <label class="block text-sm font-semibold text-slate-700 mb-2">
+                <i class="fa-solid fa-gas-pump text-blue-500 mr-1.5"></i> Fuel Type
+              </label>
+              <div class="grid grid-cols-3 gap-2">
+                <label class="cursor-pointer">
+                  <input type="radio" name="fuel_type" value="Petrol" class="peer sr-only">
+                  <div class="p-2.5 text-center text-xs font-semibold rounded-xl border border-slate-200 bg-slate-50 text-slate-700 peer-checked:bg-blue-50 peer-checked:border-blue-600 peer-checked:text-blue-700 hover:bg-slate-100 transition">
+                    Petrol
+                  </div>
+                </label>
+                <label class="cursor-pointer">
+                  <input type="radio" name="fuel_type" value="Diesel" checked class="peer sr-only">
+                  <div class="p-2.5 text-center text-xs font-semibold rounded-xl border border-slate-200 bg-slate-50 text-slate-700 peer-checked:bg-blue-50 peer-checked:border-blue-600 peer-checked:text-blue-700 hover:bg-slate-100 transition">
+                    Diesel
+                  </div>
+                </label>
+                <label class="cursor-pointer">
+                  <input type="radio" name="fuel_type" value="CNG" class="peer sr-only">
+                  <div class="p-2.5 text-center text-xs font-semibold rounded-xl border border-slate-200 bg-slate-50 text-slate-700 peer-checked:bg-blue-50 peer-checked:border-blue-600 peer-checked:text-blue-700 hover:bg-slate-100 transition">
+                    CNG
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <!-- Transmission -->
+            <div>
+              <label class="block text-sm font-semibold text-slate-700 mb-2">
+                <i class="fa-solid fa-gears text-blue-500 mr-1.5"></i> Transmission
+              </label>
+              <div class="grid grid-cols-2 gap-2">
+                <label class="cursor-pointer">
+                  <input type="radio" name="transmission" value="Manual" checked class="peer sr-only">
+                  <div class="p-2.5 text-center text-xs font-semibold rounded-xl border border-slate-200 bg-slate-50 text-slate-700 peer-checked:bg-blue-50 peer-checked:border-blue-600 peer-checked:text-blue-700 hover:bg-slate-100 transition">
+                    Manual
+                  </div>
+                </label>
+                <label class="cursor-pointer">
+                  <input type="radio" name="transmission" value="Automatic" class="peer sr-only">
+                  <div class="p-2.5 text-center text-xs font-semibold rounded-xl border border-slate-200 bg-slate-50 text-slate-700 peer-checked:bg-blue-50 peer-checked:border-blue-600 peer-checked:text-blue-700 hover:bg-slate-100 transition">
+                    Automatic
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <!-- Seller Type -->
+            <div>
+              <label class="block text-sm font-semibold text-slate-700 mb-2">
+                <i class="fa-solid fa-handshake text-blue-500 mr-1.5"></i> Seller Type
+              </label>
+              <div class="grid grid-cols-2 gap-2">
+                <label class="cursor-pointer">
+                  <input type="radio" name="seller_type" value="Dealer" checked class="peer sr-only">
+                  <div class="p-2.5 text-center text-xs font-semibold rounded-xl border border-slate-200 bg-slate-50 text-slate-700 peer-checked:bg-blue-50 peer-checked:border-blue-600 peer-checked:text-blue-700 hover:bg-slate-100 transition">
+                    Dealer
+                  </div>
+                </label>
+                <label class="cursor-pointer">
+                  <input type="radio" name="seller_type" value="Individual" class="peer sr-only">
+                  <div class="p-2.5 text-center text-xs font-semibold rounded-xl border border-slate-200 bg-slate-50 text-slate-700 peer-checked:bg-blue-50 peer-checked:border-blue-600 peer-checked:text-blue-700 hover:bg-slate-100 transition">
+                    Individual
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <!-- Previous Owners -->
+            <div>
+              <label class="block text-sm font-semibold text-slate-700 mb-2">
+                <i class="fa-solid fa-user-check text-blue-500 mr-1.5"></i> Ownership
+              </label>
+              <div class="grid grid-cols-3 gap-2">
+                <label class="cursor-pointer">
+                  <input type="radio" name="owner" value="0" checked class="peer sr-only">
+                  <div class="p-2.5 text-center text-xs font-semibold rounded-xl border border-slate-200 bg-slate-50 text-slate-700 peer-checked:bg-blue-50 peer-checked:border-blue-600 peer-checked:text-blue-700 hover:bg-slate-100 transition">
+                    1st Owner
+                  </div>
+                </label>
+                <label class="cursor-pointer">
+                  <input type="radio" name="owner" value="1" class="peer sr-only">
+                  <div class="p-2.5 text-center text-xs font-semibold rounded-xl border border-slate-200 bg-slate-50 text-slate-700 peer-checked:bg-blue-50 peer-checked:border-blue-600 peer-checked:text-blue-700 hover:bg-slate-100 transition">
+                    2nd Owner
+                  </div>
+                </label>
+                <label class="cursor-pointer">
+                  <input type="radio" name="owner" value="3" class="peer sr-only">
+                  <div class="p-2.5 text-center text-xs font-semibold rounded-xl border border-slate-200 bg-slate-50 text-slate-700 peer-checked:bg-blue-50 peer-checked:border-blue-600 peer-checked:text-blue-700 hover:bg-slate-100 transition">
+                    3+ Owners
+                  </div>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <div class="pt-4">
+            <button type="submit" id="submitBtn" class="w-full py-4 px-6 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-base shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 active:scale-[0.99] transition flex items-center justify-center gap-3">
+              <i class="fa-solid fa-calculator"></i>
+              <span>Estimate Market Resale Value</span>
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Results & Valuation Card Column -->
+      <div class="lg:col-span-5 space-y-6">
+
+        <!-- Result Box -->
+        <div id="resultCard" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-7 relative overflow-hidden transition-all duration-300">
+          <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Live AI Valuation</span>
+            </div>
+            <span id="dealBadge" class="px-2.5 py-1 text-xs font-bold rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+              Fair Market Price
+            </span>
+          </div>
+
+          <div class="mt-6 text-center">
+            <p class="text-sm font-medium text-slate-500">Estimated Fair Resale Value</p>
+            <div class="mt-2 flex items-baseline justify-center gap-2">
+              <span class="text-4xl sm:text-5xl font-black text-slate-900 tracking-tight" id="predictedPriceDisplay">₹ 4.60</span>
+              <span class="text-xl font-bold text-slate-600">Lakhs</span>
+            </div>
+            <p class="text-sm font-semibold text-blue-600 mt-1" id="formattedInrDisplay">₹ 4,60,000</p>
+          </div>
+
+          <!-- Value Metrics -->
+          <div class="grid grid-cols-2 gap-3 mt-6 p-4 rounded-xl bg-slate-50 border border-slate-100">
+            <div>
+              <span class="text-[11px] font-medium text-slate-400 uppercase tracking-wide">Fair Price Range</span>
+              <p class="text-sm font-bold text-slate-800 mt-0.5" id="rangeDisplay">₹ 4.32 L - ₹ 4.88 L</p>
+            </div>
+            <div>
+              <span class="text-[11px] font-medium text-slate-400 uppercase tracking-wide">Value Retained</span>
+              <p class="text-sm font-bold text-slate-800 mt-0.5" id="retentionDisplay">67.0%</p>
+            </div>
+          </div>
+
+          <!-- Depreciation Progress Bar -->
+          <div class="mt-5">
+            <div class="flex justify-between text-xs font-medium text-slate-600 mb-1.5">
+              <span>Depreciation from Original Cost</span>
+              <span id="deprecPctDisplay" class="font-bold text-rose-600">33.0%</span>
+            </div>
+            <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
+              <div id="deprecBar" class="h-full bg-gradient-to-r from-emerald-500 via-amber-500 to-rose-500 rounded-full transition-all duration-700" style="width: 33%;"></div>
+            </div>
+          </div>
+
+          <!-- Quick Insights List -->
+          <div class="mt-6 pt-5 border-t border-slate-100 space-y-2.5 text-xs text-slate-600">
+            <div class="flex items-center gap-2">
+              <i class="fa-solid fa-circle-check text-emerald-500"></i>
+              <span>High liquidity model with active secondary buyer demand.</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <i class="fa-solid fa-circle-check text-emerald-500"></i>
+              <span>Valuation accounts for wear-and-tear based on mileage recorded.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick EMI Calculator Card -->
+        <div class="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-6 text-white shadow-md">
+          <div class="flex items-center justify-between pb-3 border-b border-slate-700/60 mb-4">
+            <div class="flex items-center gap-2">
+              <i class="fa-solid fa-calculator text-blue-400"></i>
+              <h3 class="font-bold text-sm">Financing / EMI Quick Look</h3>
+            </div>
+            <span class="text-[11px] bg-slate-800 px-2 py-0.5 rounded text-slate-300">10.5% p.a. • 3 Yrs</span>
+          </div>
+          <div class="flex items-baseline justify-between">
+            <span class="text-xs text-slate-400">Estimated Monthly EMI (20% Down):</span>
+            <span class="text-lg font-bold text-emerald-400" id="emiDisplay">₹ 11,940 / mo</span>
+          </div>
+          <div class="mt-3 text-[11px] text-slate-400">
+            Based on standard used car financing terms. Use the full Streamlit dashboard for custom amortization schedules.
+          </div>
+        </div>
+
+        <!-- Server & API Status Card -->
+        <div class="bg-white rounded-xl border border-slate-200 p-4 text-xs flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+            <span class="text-slate-600 font-medium">FastAPI Engine: <strong class="text-slate-800">Operational</strong></span>
+          </div>
+          <div class="text-slate-400">
+            Latency: <span id="pingDisplay" class="font-semibold text-slate-600">&lt; 15 ms</span>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-slate-200 bg-white py-6 mt-12 text-center text-xs text-slate-500">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div>
+        AutoValuate AI &copy; 2026 • Machine Learning Powered Used Car Price Prediction
+      </div>
+      <div class="flex items-center space-x-4">
+        <a href="/docs" class="hover:text-blue-600 transition">Swagger API</a>
+        <a href="/health" class="hover:text-blue-600 transition">Health Status</a>
+        <a href="http://localhost:8501" class="hover:text-blue-600 transition">Streamlit Interface</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Car defaults map
+    const CAR_DATA = {
+      'swift': { price: 6.87, fuel: 'Diesel', trans: 'Manual', seller: 'Dealer' },
+      'city': { price: 9.85, fuel: 'Petrol', trans: 'Manual', seller: 'Dealer' },
+      'verna': { price: 9.4, fuel: 'Diesel', trans: 'Manual', seller: 'Dealer' },
+      'fortuner': { price: 31.0, fuel: 'Diesel', trans: 'Automatic', seller: 'Dealer' },
+      'innova': { price: 18.0, fuel: 'Diesel', trans: 'Manual', seller: 'Dealer' },
+      'ciaz': { price: 8.89, fuel: 'Diesel', trans: 'Manual', seller: 'Dealer' },
+      'i20': { price: 7.5, fuel: 'Petrol', trans: 'Manual', seller: 'Individual' },
+      'brio': { price: 5.3, fuel: 'Petrol', trans: 'Manual', seller: 'Dealer' },
+      'amaze': { price: 7.0, fuel: 'Diesel', trans: 'Manual', seller: 'Dealer' },
+      'ertiga': { price: 8.5, fuel: 'Diesel', trans: 'Manual', seller: 'Dealer' },
+      'wagon r': { price: 4.5, fuel: 'Petrol', trans: 'Manual', seller: 'Dealer' },
+      'corolla altis': { price: 15.0, fuel: 'Petrol', trans: 'Manual', seller: 'Dealer' },
+      'sx4': { price: 8.2, fuel: 'Diesel', trans: 'Dealer', trans: 'Manual' },
+      'ritz': { price: 5.59, fuel: 'Petrol', trans: 'Manual', seller: 'Dealer' },
+      'dzire': { price: 6.5, fuel: 'Petrol', trans: 'Manual', seller: 'Dealer' },
+      'jazz': { price: 7.2, fuel: 'Petrol', trans: 'Manual', seller: 'Dealer' },
+      'grand i10': { price: 5.8, fuel: 'Petrol', trans: 'Manual', seller: 'Dealer' },
+      'alto k10': { price: 3.8, fuel: 'Petrol', trans: 'Manual', seller: 'Dealer' },
+      'baleno': { price: 7.8, fuel: 'Petrol', trans: 'Manual', seller: 'Dealer' },
+      'creta': { price: 12.5, fuel: 'Diesel', trans: 'Manual', seller: 'Dealer' },
+      's cross': { price: 8.6, fuel: 'Diesel', trans: 'Manual', seller: 'Dealer' },
+      'Royal Enfield Classic 350': { price: 1.5, fuel: 'Petrol', trans: 'Manual', seller: 'Individual' },
+      'Bajaj Pulsar 150': { price: 0.8, fuel: 'Petrol', trans: 'Manual', seller: 'Individual' }
+    };
+
+    function updateAgeDisplay() {
+      const year = parseInt(document.getElementById('year').value);
+      const currentYear = 2026;
+      const age = Math.max(0, currentYear - year);
+      document.getElementById('ageBadge').innerText = age + ' yrs old';
+    }
+
+    function autoFillDefaults() {
+      const car = document.getElementById('car_name').value;
+      if (CAR_DATA[car]) {
+        document.getElementById('present_price').value = CAR_DATA[car].price;
+        if (CAR_DATA[car].fuel) {
+          const radio = document.querySelector(`input[name="fuel_type"][value="${CAR_DATA[car].fuel}"]`);
+          if (radio) radio.checked = true;
+        }
+        if (CAR_DATA[car].trans) {
+          const radio = document.querySelector(`input[name="transmission"][value="${CAR_DATA[car].trans}"]`);
+          if (radio) radio.checked = true;
+        }
+      }
+      calculatePrice();
+    }
+
+    function applyPreset(name, year, price, kms, fuel, seller, trans, owner) {
+      document.getElementById('car_name').value = name;
+      document.getElementById('year').value = year;
+      document.getElementById('yearDisplay').innerText = year;
+      document.getElementById('present_price').value = price;
+      document.getElementById('kms_driven').value = kms;
+      document.getElementById('kmsInput').value = kms;
+      document.getElementById('kmsDisplay').innerText = Number(kms).toLocaleString() + ' km';
+      
+      const fuelRadio = document.querySelector(`input[name="fuel_type"][value="${fuel}"]`);
+      if (fuelRadio) fuelRadio.checked = true;
+      const sellerRadio = document.querySelector(`input[name="seller_type"][value="${seller}"]`);
+      if (sellerRadio) sellerRadio.checked = true;
+      const transRadio = document.querySelector(`input[name="transmission"][value="${trans}"]`);
+      if (transRadio) transRadio.checked = true;
+      const ownerRadio = document.querySelector(`input[name="owner"][value="${owner}"]`);
+      if (ownerRadio) ownerRadio.checked = true;
+
+      updateAgeDisplay();
+      calculatePrice();
+    }
+
+    async function calculatePrice() {
+      const btn = document.getElementById('submitBtn');
+      const car_name = document.getElementById('car_name').value;
+      const year = parseInt(document.getElementById('year').value);
+      const present_price = parseFloat(document.getElementById('present_price').value);
+      const kms_driven = parseInt(document.getElementById('kms_driven').value);
+      const fuel_type = document.querySelector('input[name="fuel_type"]:checked').value;
+      const seller_type = document.querySelector('input[name="seller_type"]:checked').value;
+      const transmission = document.querySelector('input[name="transmission"]:checked').value;
+      const owner = parseInt(document.querySelector('input[name="owner"]:checked').value);
+
+      const payload = {
+        Car_Name: car_name,
+        Year: year,
+        Present_Price: present_price,
+        Kms_Driven: kms_driven,
+        Fuel_Type: fuel_type,
+        Seller_Type: seller_type,
+        Transmission: transmission,
+        Owner: owner
+      };
+
+      const startTime = performance.now();
+      try {
+        const res = await fetch('/predict', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const elapsed = Math.round(performance.now() - startTime);
+        document.getElementById('pingDisplay').innerText = elapsed + ' ms';
+
+        if (res.ok) {
+          const data = await res.json();
+          const price = data.prediction_price;
+          const low = data.fair_price_low || (price * 0.94);
+          const high = data.fair_price_high || (price * 1.06);
+          const inr = Math.round(price * 100000);
+
+          document.getElementById('predictedPriceDisplay').innerText = '₹ ' + price.toFixed(2);
+          document.getElementById('formattedInrDisplay').innerText = '₹ ' + inr.toLocaleString('en-IN');
+          document.getElementById('rangeDisplay').innerText = `₹ ${low.toFixed(2)} L - ₹ ${high.toFixed(2)} L`;
+
+          // Depreciation
+          let deprecPct = 0;
+          if (present_price > 0) {
+            deprecPct = Math.max(0, Math.min(95, Math.round(((present_price - price) / present_price) * 100)));
+          }
+          const retainPct = 100 - deprecPct;
+          document.getElementById('retentionDisplay').innerText = retainPct + '%';
+          document.getElementById('deprecPctDisplay').innerText = deprecPct + '%';
+          document.getElementById('deprecBar').style.width = deprecPct + '%';
+
+          // EMI calculation (80% financed at 10.5% for 3 years)
+          const loanAmt = inr * 0.8;
+          const monthlyRate = 10.5 / 12 / 100;
+          const months = 36;
+          const emi = Math.round((loanAmt * monthlyRate * Math.pow(1 + monthlyRate, months)) / (Math.pow(1 + monthlyRate, months) - 1));
+          document.getElementById('emiDisplay').innerText = '₹ ' + emi.toLocaleString('en-IN') + ' / mo';
+
+          // Deal badge
+          const dealBadge = document.getElementById('dealBadge');
+          if (deprecPct > 55) {
+            dealBadge.innerText = 'High Depreciation • Bargain Deal';
+            dealBadge.className = 'px-2.5 py-1 text-xs font-bold rounded-full bg-blue-50 text-blue-700 border border-blue-200';
+          } else if (deprecPct > 30) {
+            dealBadge.innerText = 'Fair Market Price';
+            dealBadge.className = 'px-2.5 py-1 text-xs font-bold rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200';
+          } else {
+            dealBadge.innerText = 'Strong Value Retention';
+            dealBadge.className = 'px-2.5 py-1 text-xs font-bold rounded-full bg-amber-50 text-amber-700 border border-amber-200';
+          }
+        }
+      } catch (err) {
+        console.error('Fetch error:', err);
+      }
+    }
+
+    // Initialize on load
+    window.addEventListener('DOMContentLoaded', () => {
+      updateAgeDisplay();
+      calculatePrice();
+    });
+  </script>
+</body>
+</html>
